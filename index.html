@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Texto em Voz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 { color: #333; margin-top: 0; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🗣️ Texto para Voz</h2>
+    <textarea id="text-input" placeholder="Digite algo aqui..."></textarea>
+    
+    <select id="voice-select">
+        </select>
+
+    <button id="speak-btn">Ouvir Texto</button>
+</div>
+
+<script>
+    const synth = window.speechSynthesis;
+    const textInput = document.getElementById('text-input');
+    const voiceSelect = document.getElementById('voice-select');
+    const speakBtn = document.getElementById('speak-btn');
+
+    let voices = [];
+
+    // Função para carregar as vozes disponíveis no navegador
+    function loadVoices() {
+        voices = synth.getVoices();
+        voiceSelect.innerHTML = '';
+        
+        voices.forEach((voice, i) => {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            
+            // Tenta selecionar português por padrão
+            if(voice.lang.includes('pt-BR')) {
+                option.selected = true;
+            }
+            
+            voiceSelect.appendChild(option);
+        });
+    }
+
+    // A API de vozes é carregada de forma assíncrona
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
+
+    // Função para falar
+    speakBtn.addEventListener('click', () => {
+        if (synth.speaking) {
+            console.error('Já estou falando...');
+            return;
+        }
+
+        if (textInput.value !== '') {
+            const utterThis = new SpeechSynthesisUtterance(textInput.value);
+            
+            // Define a voz selecionada
+            const selectedVoiceIndex = voiceSelect.value;
+            utterThis.voice = voices[selectedVoiceIndex];
+
+            // Opcional: ajustar tom e velocidade
+            utterThis.pitch = 1; 
+            utterThis.rate = 1;
+
+            synth.speak(utterThis);
+        }
+    });
+</script>
+
+</body>
+</html>
